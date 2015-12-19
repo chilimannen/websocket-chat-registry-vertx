@@ -1,0 +1,28 @@
+<component name="libraryTable">
+  <library name="io.vertx:vertx-unit:3.2.0" type="repository">
+    <properties maven-id="io.vertx:vertx-unit:3.2.0" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/vertx-unit-3.2.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/vertx-core-3.2.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/netty-common-4.0.33.Final.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/netty-buffer-4.0.33.Final.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/netty-transport-4.0.33.Final.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/netty-handler-4.0.33.Final.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/netty-codec-4.0.33.Final.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/netty-codec-http-4.0.33.Final.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-core-2.6.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-databind-2.6.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-annotations-2.6.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/vertx-docgen-3.2.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/vertx-codetrans-3.2.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/vertx-codegen-3.2.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/mvel2-2.2.6.Final.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/lib/vertx-unit-3.2.0-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/lib/vertx-unit-3.2.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
