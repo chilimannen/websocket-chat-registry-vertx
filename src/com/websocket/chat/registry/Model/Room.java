@@ -7,7 +7,7 @@ package com.websocket.chat.registry.Model;
  */
 public class Room {
     private String room;
-    private Integer hit = 0;
+    private Integer hit = 1;
 
     public Room(String room) {
         this.room = room;
@@ -17,7 +17,7 @@ public class Room {
         if (hit == Integer.MAX_VALUE)
             hit = 0;
 
-        hit++;
+        hit += 1;
     }
 
     public Integer getHits() {

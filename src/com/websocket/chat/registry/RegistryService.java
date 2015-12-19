@@ -2,16 +2,18 @@ package com.websocket.chat.registry;
 
 import com.websocket.chat.registry.Exception.NoServersFound;
 import com.websocket.chat.registry.Model.Room;
-import com.websocket.chat.registry.Protocol.Header;
+import com.websocket.chat.registry.Model.Server;
 import com.websocket.chat.registry.Protocol.Packet;
 import com.websocket.chat.registry.Protocol.Serializer;
-import com.websocket.chat.registry.Model.Server;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Verticle;
 import io.vertx.core.Vertx;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
 /**
  * Created by Robin on 2015-12-18.
@@ -49,7 +51,6 @@ public class RegistryService implements Verticle {
     private void startRegistryEventListener() {
         vertx.createHttpServer().websocketHandler(event -> {
             event.handler(data -> {
-
                 Packet packet = (Packet) Serializer.unpack(data.toString(), Packet.class);
 
                 if (eventHandler.get(packet.getAction()) != null)
@@ -62,9 +63,6 @@ public class RegistryService implements Verticle {
     private void startRegistryLookupService() {
         vertx.createHttpServer().websocketHandler(event -> {
             event.handler(data -> {
-
-                System.out.println("lookupService: " + data.toString());
-
                 Packet packet = (Packet) Serializer.unpack(data.toString(), Packet.class);
 
                 if (messageHandler.get(packet.getAction()) != null)
@@ -72,7 +70,7 @@ public class RegistryService implements Verticle {
                             event.textHandlerID(), data.toString(), this);
             });
 
-        }).listen(Launcher.LISTEN_PORT, "localhost");
+        }).listen(Launcher.CLIENT_PORT);
     }
 
 
@@ -113,6 +111,7 @@ public class RegistryService implements Verticle {
 
         try {
             Server preferred = ready.get(new Random().nextInt(ready.size()));
+
             Integer hits = -1;
 
             for (Server server : ready) {
@@ -124,6 +123,8 @@ public class RegistryService implements Verticle {
                 }
             }
 
+            if (preferred.getRooms().containsKey(roomName))
+                preferred.getRooms().get(roomName).hit();
             return preferred;
         } catch (IllegalArgumentException e) {
             throw new NoServersFound();

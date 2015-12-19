@@ -8,6 +8,8 @@ import com.websocket.chat.registry.Protocol.Serializer;
 
 /**
  * Created by Robin on 2015-12-18.
+ * <p>
+ * Handles messages from a client.
  */
 enum MessageHandler {
     HandleLookup {

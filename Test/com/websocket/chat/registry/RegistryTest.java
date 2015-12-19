@@ -1,18 +1,15 @@
 package com.websocket.chat.registry;
 
-import com.sun.security.sasl.ServerFactoryImpl;
-import com.websocket.chat.registry.Model.Server;
 import com.websocket.chat.registry.Protocol.*;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.WebSocket;
 import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.Repeat;
 import io.vertx.ext.unit.junit.RepeatRule;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import io.vertx.ext.unit.TestContext;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -23,6 +20,8 @@ import org.junit.runner.RunWith;
 
 /**
  * Created by Robin on 2015-12-18.
+ * <p>
+ * Tests for the Registry service.
  */
 
 @RunWith(VertxUnitRunner.class)
@@ -30,7 +29,7 @@ public class RegistryTest {
     private Vertx vertx;
 
     @Rule
-    public Timeout timeout = new Timeout(2000);
+    public Timeout timeout = new Timeout(10000);
 
     @Rule
     public RepeatRule rule = new RepeatRule();
@@ -166,7 +165,6 @@ public class RegistryTest {
     public void shouldPreferServerWithMoreHits(TestContext context) {
         final Async async = context.async();
         final CountDown counter = new CountDown(20);
-        final Server server = new Server(null, null, null);
 
         getConnectorSocket(connector -> {
             sendBus(connector.textHandlerID(), new ServerEvent("registry.tester.1", ServerEvent.ServerStatus.UP));
@@ -215,12 +213,12 @@ public class RegistryTest {
 
 
     public void getServiceClientBuffer(Handler<Buffer> handler) {
-        vertx.createHttpClient().websocket(Launcher.LISTEN_PORT, "localhost", "/", event -> {
+        vertx.createHttpClient().websocket(Launcher.CLIENT_PORT, "localhost", "/", event -> {
             event.handler(handler);
         });
     }
 
     public void getServiceClientSocket(Handler<WebSocket> handler) {
-        vertx.createHttpClient().websocket(Launcher.LISTEN_PORT, "localhost", "/", handler);
+        vertx.createHttpClient().websocket(Launcher.CLIENT_PORT, "localhost", "/", handler);
     }
 }
