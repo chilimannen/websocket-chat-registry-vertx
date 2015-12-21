@@ -9,8 +9,6 @@ import io.vertx.core.*;
  */
 
 public class Launcher extends AbstractVerticle {
-    public final static Integer CLIENT_PORT = 6090;
-    public final static Integer CONNECTOR_PORT = 7040;
     private Vertx vertx;
 
     @Override

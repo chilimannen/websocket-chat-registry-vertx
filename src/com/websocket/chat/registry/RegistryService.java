@@ -35,7 +35,7 @@ public class RegistryService implements Verticle {
     @Override
     public void init(Vertx vertx, Context context) {
         this.vertx = vertx;
-        
+
         eventHandler.put(RoomEvent.ACTION, EventHandler.HandleRoom);
         eventHandler.put(ServerEvent.ACTION, EventHandler.HandleServer);
 
@@ -57,8 +57,8 @@ public class RegistryService implements Verticle {
                     eventHandler.get(packet.getAction()).handle(data.toString(), this);
             });
 
-        }).listen(Launcher.CONNECTOR_PORT);
-        System.out.println("Registry running on port " + Launcher.CONNECTOR_PORT);
+        }).listen(Configuration.CONNECTOR_PORT);
+        System.out.println("Registry running on port " + Configuration.CONNECTOR_PORT);
     }
 
     private void startRegistryLookupService() {
@@ -71,8 +71,8 @@ public class RegistryService implements Verticle {
                             event.textHandlerID(), data.toString(), this);
             });
 
-        }).listen(Launcher.CLIENT_PORT);
-        System.out.println("Lookup service running on port " + Launcher.CLIENT_PORT);
+        }).listen(Configuration.CLIENT_PORT);
+        System.out.println("Lookup service running on port " + Configuration.CLIENT_PORT);
     }
 
 
@@ -113,7 +113,6 @@ public class RegistryService implements Verticle {
 
         try {
             Server preferred = ready.get(new Random().nextInt(ready.size()));
-
             Integer hits = -1;
 
             for (Server server : ready) {

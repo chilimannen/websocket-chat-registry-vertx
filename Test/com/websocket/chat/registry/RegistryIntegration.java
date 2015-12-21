@@ -25,11 +25,11 @@ import org.junit.runner.RunWith;
  */
 
 @RunWith(VertxUnitRunner.class)
-public class RegistryTest {
+public class RegistryIntegration {
     private Vertx vertx;
 
     @Rule
-    public Timeout timeout = new Timeout(10000);
+    public Timeout timeout = new Timeout(1000);
 
     @Rule
     public RepeatRule rule = new RepeatRule();
@@ -54,17 +54,17 @@ public class RegistryTest {
                 client.handler(data -> {
                     Index index = (Index) Serializer.unpack(data.toString(), Index.class);
 
-                    context.assertEquals(index.getName(), "registrytester.1");
+                    context.assertEquals(index.getName(), "registry.tester.1");
                     context.assertEquals(index.getIp(), "localhost");
                     context.assertEquals(index.getPort(), 6767);
-
+                    unregister(connector.textHandlerID(), 1);
                     async.complete();
                 });
                 sendBus(client.textHandlerID(), new Lookup("room"));
             });
             sendBus(connector.textHandlerID(),
                     new ServerEvent()
-                            .setName("registrytester.1")
+                            .setName("registry.tester.1")
                             .setIp("localhost")
                             .setPort(6767)
                             .setStatus(ServerEvent.ServerStatus.UP));
@@ -81,18 +81,23 @@ public class RegistryTest {
                 client.handler(data -> {
                     Index index = (Index) Serializer.unpack(data.toString(), Index.class);
                     context.assertTrue(index.getFull());
+                    unregister(connector.textHandlerID(),1);
                     async.complete();
                 });
                 sendBus(client.textHandlerID(), new Lookup("room"));
             });
-            sendBus(connector.textHandlerID(), serverEvent(ServerEvent.ServerStatus.UP));
-            sendBus(connector.textHandlerID(), serverEvent(ServerEvent.ServerStatus.DOWN));
+            sendBus(connector.textHandlerID(), serverEvent(ServerEvent.ServerStatus.UP, 1));
+            sendBus(connector.textHandlerID(), serverEvent(ServerEvent.ServerStatus.FULL, 1));
         });
     }
 
 
-    private ServerEvent serverEvent(ServerEvent.ServerStatus status) {
-        return new ServerEvent("registry.tester.1", status);
+    private ServerEvent serverEvent(ServerEvent.ServerStatus status, Integer id) {
+        return new ServerEvent("registry.tester." + id, status);
+    }
+
+    private void unregister(String address, Integer id) {
+        sendBus(address, serverEvent(ServerEvent.ServerStatus.DOWN, id));
     }
 
     @Test
@@ -103,14 +108,18 @@ public class RegistryTest {
 
             getServiceClientSocket(client -> {
                 client.handler(data -> {
+
+                    System.out.println(data.toString());
+
                     Index index = (Index) Serializer.unpack(data.toString(), Index.class);
                     context.assertTrue(index.getFull());
+                    unregister(connector.textHandlerID(), 1);
                     async.complete();
                 });
                 sendBus(client.textHandlerID(), new Lookup("room"));
             });
-            sendBus(connector.textHandlerID(), serverEvent(ServerEvent.ServerStatus.UP));
-            sendBus(connector.textHandlerID(), serverEvent(ServerEvent.ServerStatus.FULL));
+            sendBus(connector.textHandlerID(), serverEvent(ServerEvent.ServerStatus.UP, 1));
+            sendBus(connector.textHandlerID(), serverEvent(ServerEvent.ServerStatus.FULL, 1));
         });
     }
 
@@ -124,13 +133,14 @@ public class RegistryTest {
                 client.handler(data -> {
                     Index index = (Index) Serializer.unpack(data.toString(), Index.class);
                     context.assertFalse(index.getFull());
+                    unregister(connector.textHandlerID(), 1);
                     async.complete();
                 });
                 sendBus(client.textHandlerID(), new Lookup("room"));
             });
-            sendBus(connector.textHandlerID(), serverEvent(ServerEvent.ServerStatus.UP));
-            sendBus(connector.textHandlerID(), serverEvent(ServerEvent.ServerStatus.FULL));
-            sendBus(connector.textHandlerID(), serverEvent(ServerEvent.ServerStatus.READY));
+            sendBus(connector.textHandlerID(), serverEvent(ServerEvent.ServerStatus.UP, 1));
+            sendBus(connector.textHandlerID(), serverEvent(ServerEvent.ServerStatus.FULL, 1));
+            sendBus(connector.textHandlerID(), serverEvent(ServerEvent.ServerStatus.READY, 1));
         });
     }
 
@@ -145,14 +155,20 @@ public class RegistryTest {
                 client.handler(data -> {
                     Index index = (Index) Serializer.unpack(data.toString(), Index.class);
                     context.assertEquals(index.getName(), "registry.tester.2");
+                    unregister(connector.textHandlerID(), 2);
+                    unregister(connector.textHandlerID(), 1);
                     async.complete();
                 });
                 sendBus(client.textHandlerID(), new Lookup("room"));
             });
-            sendBus(connector.textHandlerID(), new ServerEvent("registry.tester.1", ServerEvent.ServerStatus.UP));
-            sendBus(connector.textHandlerID(), new ServerEvent("registry.tester.2", ServerEvent.ServerStatus.UP));
-            sendBus(connector.textHandlerID(), new RoomEvent("registry.tester.2", "room", RoomEvent.RoomStatus.POPULATED));
+            sendBus(connector.textHandlerID(), serverEvent(ServerEvent.ServerStatus.UP, 1));
+            sendBus(connector.textHandlerID(), serverEvent(ServerEvent.ServerStatus.UP, 2));
+            sendBus(connector.textHandlerID(), roomEvent(RoomEvent.RoomStatus.POPULATED, "room", 2));
         });
+    }
+
+    private RoomEvent roomEvent(RoomEvent.RoomStatus status, String room, Integer id) {
+        return new RoomEvent("registry.tester." + id, room, status);
     }
 
 
@@ -167,17 +183,17 @@ public class RegistryTest {
         final CountDown counter = new CountDown(20);
 
         getConnectorSocket(connector -> {
-            sendBus(connector.textHandlerID(), new ServerEvent("registry.tester.1", ServerEvent.ServerStatus.UP));
-            sendBus(connector.textHandlerID(), new ServerEvent("registry.tester.2", ServerEvent.ServerStatus.UP));
-            sendBus(connector.textHandlerID(), new RoomEvent("registry.tester.1", "room", RoomEvent.RoomStatus.POPULATED));
-            sendBus(connector.textHandlerID(), new RoomEvent("registry.tester.2", "room", RoomEvent.RoomStatus.POPULATED));
-            sendBus(connector.textHandlerID(), new ServerEvent("registry.tester.1", ServerEvent.ServerStatus.FULL));
+            sendBus(connector.textHandlerID(), serverEvent(ServerEvent.ServerStatus.UP, 1));
+            sendBus(connector.textHandlerID(), serverEvent(ServerEvent.ServerStatus.UP, 2));
+            sendBus(connector.textHandlerID(), roomEvent(RoomEvent.RoomStatus.POPULATED, "room", 1));
+            sendBus(connector.textHandlerID(), roomEvent(RoomEvent.RoomStatus.POPULATED, "room", 2));
+            sendBus(connector.textHandlerID(), serverEvent(ServerEvent.ServerStatus.FULL, 1));
 
             getServiceClientSocket(client -> {
                 sendBus(client.textHandlerID(), new Lookup("room"));
 
                 client.handler(response -> {
-                    sendBus(connector.textHandlerID(), new ServerEvent("registry.tester.1", ServerEvent.ServerStatus.READY));
+                    sendBus(connector.textHandlerID(), serverEvent(ServerEvent.ServerStatus.READY, 1));
                 });
             });
 
@@ -187,8 +203,11 @@ public class RegistryTest {
 
                     context.assertEquals(index.getName(), "registry.tester.2");
 
-                    if (counter.down() == 0)
+                    if (counter.down() == 0) {
+                        unregister(connector.textHandlerID(), 1);
+                        unregister(connector.textHandlerID(), 2);
                         async.complete();
+                    }
                 });
 
                 for (int i = 0; i < counter.left(); i++)
@@ -202,23 +221,23 @@ public class RegistryTest {
     }
 
     public void getConnectorBuffer(Handler<Buffer> handler) {
-        vertx.createHttpClient().websocket(Launcher.CONNECTOR_PORT, "localhost", "/", event -> {
+        vertx.createHttpClient().websocket(Configuration.CONNECTOR_PORT, "localhost", "/", event -> {
             event.handler(handler);
         });
     }
 
     public void getConnectorSocket(Handler<WebSocket> handler) {
-        vertx.createHttpClient().websocket(Launcher.CONNECTOR_PORT, "localhost", "/", handler);
+        vertx.createHttpClient().websocket(Configuration.CONNECTOR_PORT, "localhost", "/", handler);
     }
 
 
     public void getServiceClientBuffer(Handler<Buffer> handler) {
-        vertx.createHttpClient().websocket(Launcher.CLIENT_PORT, "localhost", "/", event -> {
+        vertx.createHttpClient().websocket(Configuration.CLIENT_PORT, "localhost", "/", event -> {
             event.handler(handler);
         });
     }
 
     public void getServiceClientSocket(Handler<WebSocket> handler) {
-        vertx.createHttpClient().websocket(Launcher.CLIENT_PORT, "localhost", "/", handler);
+        vertx.createHttpClient().websocket(Configuration.CLIENT_PORT, "localhost", "/", handler);
     }
 }
