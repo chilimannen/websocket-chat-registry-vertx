@@ -1,7 +1,5 @@
 package com.websocket.chat.registry.Protocol;
 
-import com.websocket.chat.registry.Model.Server;
-
 /**
  * Created by Robin on 2015-12-18.
  * <p>
@@ -9,6 +7,7 @@ import com.websocket.chat.registry.Model.Server;
  * which servers have users in which rooms.
  */
 public class RoomEvent {
+    public static final String ACTION = "registry.room";
     private RoomStatus status;
     private String server;
     private String room;
@@ -22,7 +21,7 @@ public class RoomEvent {
     }
 
     public RoomEvent() {
-        this.header = new Header("registry.room");
+        this.header = new Header(ACTION);
     }
 
     public RoomStatus getStatus() {

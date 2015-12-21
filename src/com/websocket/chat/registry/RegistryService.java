@@ -3,8 +3,7 @@ package com.websocket.chat.registry;
 import com.websocket.chat.registry.Exception.NoServersFound;
 import com.websocket.chat.registry.Model.Room;
 import com.websocket.chat.registry.Model.Server;
-import com.websocket.chat.registry.Protocol.Packet;
-import com.websocket.chat.registry.Protocol.Serializer;
+import com.websocket.chat.registry.Protocol.*;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Verticle;
@@ -36,10 +35,11 @@ public class RegistryService implements Verticle {
     @Override
     public void init(Vertx vertx, Context context) {
         this.vertx = vertx;
-        eventHandler.put("registry.room", EventHandler.HandleRoom);
-        eventHandler.put("registry.server", EventHandler.HandleServer);
+        
+        eventHandler.put(RoomEvent.ACTION, EventHandler.HandleRoom);
+        eventHandler.put(ServerEvent.ACTION, EventHandler.HandleServer);
 
-        messageHandler.put("registry.lookup", MessageHandler.HandleLookup);
+        messageHandler.put(Lookup.ACTION, MessageHandler.HandleLookup);
     }
 
     @Override
@@ -58,6 +58,7 @@ public class RegistryService implements Verticle {
             });
 
         }).listen(Launcher.CONNECTOR_PORT);
+        System.out.println("Registry running on port " + Launcher.CONNECTOR_PORT);
     }
 
     private void startRegistryLookupService() {
@@ -71,6 +72,7 @@ public class RegistryService implements Verticle {
             });
 
         }).listen(Launcher.CLIENT_PORT);
+        System.out.println("Lookup service running on port " + Launcher.CLIENT_PORT);
     }
 
 
@@ -147,7 +149,7 @@ public class RegistryService implements Verticle {
     }
 
 
-    public void setFull(String name, boolean isFull) {
+    protected void setFull(String name, boolean isFull) {
         Server server = servers.get(name);
 
         if (server != null)

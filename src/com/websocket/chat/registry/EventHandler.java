@@ -11,7 +11,7 @@ import com.websocket.chat.registry.Protocol.ServerEvent;
  * <p>
  * Handles events from the backend regarding changes
  * in the list of servers that are subscribed to a room.
- *
+ * <p>
  * Handles events that indicate server state as well.
  */
 enum EventHandler {
@@ -37,6 +37,8 @@ enum EventHandler {
         @Override
         public void handle(String data, RegistryService registry) {
             ServerEvent server = (ServerEvent) Serializer.unpack(data, ServerEvent.class);
+
+            System.out.println(data);
 
             if (server.getStatus() != null)
                 switch (server.getStatus()) {

@@ -6,6 +6,7 @@ package com.websocket.chat.registry.Protocol;
  * A request for a server.
  */
 public class Lookup {
+    public static final String ACTION = "registry.lookup";
     private Header header;
     private String room;
 
@@ -15,7 +16,7 @@ public class Lookup {
 
     public Lookup(String room) {
         this.room = room;
-        this.header = new Header("registry.lookup");
+        this.header = new Header(ACTION);
     }
 
     public Header getHeader() {
