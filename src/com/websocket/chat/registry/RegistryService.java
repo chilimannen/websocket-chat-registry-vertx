@@ -57,6 +57,10 @@ public class RegistryService implements Verticle {
                     eventHandler.get(packet.getAction()).handle(data.toString(), this);
             });
 
+            event.closeHandler(close -> {
+                servers.clear();
+            });
+
         }).listen(Configuration.CONNECTOR_PORT);
         System.out.println("Registry running on port " + Configuration.CONNECTOR_PORT);
     }

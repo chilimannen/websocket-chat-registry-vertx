@@ -94,7 +94,7 @@ public class RegistryUnit {
 
 
     @Test
-    public void shouldPreferServerWithRoomLoaded(TestContext context) throws Exception {
+    public void shouldPreferServerWithRoomLoaded() throws Exception {
         RegistryService registry = new RegistryService();
         Server server = new Server("not_this", "", 80);
         Server preferred = new Server("the_one", "2", 80);
