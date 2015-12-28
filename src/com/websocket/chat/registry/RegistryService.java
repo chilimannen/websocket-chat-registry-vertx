@@ -26,6 +26,7 @@ public class RegistryService implements Verticle {
     private Map<String, EventHandler> eventHandler = new HashMap<>();
     private Map<String, MessageHandler> messageHandler = new HashMap<>();
     private Vertx vertx;
+    private Integer hits = 0;
 
     @Override
     public Vertx getVertx() {
@@ -46,6 +47,7 @@ public class RegistryService implements Verticle {
     public void start(Future<Void> startFuture) throws Exception {
         startRegistryEventListener();
         startRegistryLookupService();
+        startHitCountLog();
     }
 
     private void startRegistryEventListener() {
@@ -70,15 +72,24 @@ public class RegistryService implements Verticle {
             event.handler(data -> {
                 Packet packet = (Packet) Serializer.unpack(data.toString(), Packet.class);
 
-                if (messageHandler.get(packet.getAction()) != null)
+                if (messageHandler.get(packet.getAction()) != null) {
                     messageHandler.get(packet.getAction()).handle(
                             event.textHandlerID(), data.toString(), this);
+                    hits += 1;
+                }
             });
 
         }).listen(Configuration.CLIENT_PORT);
         System.out.println("Lookup service running on port " + Configuration.CLIENT_PORT);
     }
 
+    private void startHitCountLog() {
+        vertx.setPeriodic(Configuration.LOG_INTERVAL, event -> {
+            sendBus(Configuration.BUS_LOGGING, new HitCounterLog(hits));
+            sendBus(Configuration.BUS_LOGGING, new ServerTreeLog(servers));
+            hits = 0;
+        });
+    }
 
     protected void sendBus(String address, Object data) {
         vertx.eventBus().send(address, Serializer.pack(data));

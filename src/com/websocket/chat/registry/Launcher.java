@@ -24,6 +24,7 @@ public class Launcher extends AbstractVerticle {
     @Override
     public void start(Future<Void> startFuture) throws Exception {
         vertx.deployVerticle(new RegistryService());
+        vertx.deployVerticle(new Logger());
     }
 
     @Override

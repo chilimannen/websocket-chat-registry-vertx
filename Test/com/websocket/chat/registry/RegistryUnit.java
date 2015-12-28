@@ -107,5 +107,4 @@ public class RegistryUnit {
                 throw new Exception("Server with room loaded not preferred.");
         }
     }
-
 }

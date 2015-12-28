@@ -30,6 +30,7 @@ enum EventHandler {
                         registry.removeRoom(room.getServer(), room.getRoom());
                         break;
                 }
+            registry.sendBus(Configuration.BUS_LOGGING, data);
         }
     },
 
@@ -55,6 +56,7 @@ enum EventHandler {
                         registry.setFull(server.getName(), false);
                         break;
                 }
+            registry.sendBus(Configuration.BUS_LOGGING, data);
         }
     };
 

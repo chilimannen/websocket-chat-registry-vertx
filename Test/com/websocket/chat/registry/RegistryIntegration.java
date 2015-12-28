@@ -29,7 +29,7 @@ public class RegistryIntegration {
     private Vertx vertx;
 
     @Rule
-    public Timeout timeout = new Timeout(1000);
+    public Timeout timeout = new Timeout(10000);
 
     @Rule
     public RepeatRule rule = new RepeatRule();
