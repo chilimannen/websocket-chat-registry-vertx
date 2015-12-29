@@ -39,8 +39,6 @@ enum EventHandler {
         public void handle(String data, RegistryService registry) {
             ServerEvent server = (ServerEvent) Serializer.unpack(data, ServerEvent.class);
 
-            System.out.println(data);
-
             if (server.getStatus() != null)
                 switch (server.getStatus()) {
                     case UP:
@@ -56,7 +54,6 @@ enum EventHandler {
                         registry.setFull(server.getName(), false);
                         break;
                 }
-            registry.sendBus(Configuration.BUS_LOGGING, data);
         }
     };
 

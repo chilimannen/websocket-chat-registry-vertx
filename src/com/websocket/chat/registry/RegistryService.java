@@ -26,7 +26,7 @@ public class RegistryService implements Verticle {
     private Map<String, EventHandler> eventHandler = new HashMap<>();
     private Map<String, MessageHandler> messageHandler = new HashMap<>();
     private Vertx vertx;
-    private Integer hits = 0;
+    private IOLogger logger = new IOLogger();
 
     @Override
     public Vertx getVertx() {
@@ -55,8 +55,10 @@ public class RegistryService implements Verticle {
             event.handler(data -> {
                 Packet packet = (Packet) Serializer.unpack(data.toString(), Packet.class);
 
-                if (eventHandler.get(packet.getAction()) != null)
+                if (eventHandler.get(packet.getAction()) != null) {
                     eventHandler.get(packet.getAction()).handle(data.toString(), this);
+                    logger.in();
+                }
             });
 
             event.closeHandler(close -> {
@@ -75,7 +77,7 @@ public class RegistryService implements Verticle {
                 if (messageHandler.get(packet.getAction()) != null) {
                     messageHandler.get(packet.getAction()).handle(
                             event.textHandlerID(), data.toString(), this);
-                    hits += 1;
+                    logger.out();
                 }
             });
 
@@ -85,9 +87,9 @@ public class RegistryService implements Verticle {
 
     private void startHitCountLog() {
         vertx.setPeriodic(Configuration.LOG_INTERVAL, event -> {
-            sendBus(Configuration.BUS_LOGGING, new HitCounterLog(hits));
+            sendBus(Configuration.BUS_LOGGING, logger);
             sendBus(Configuration.BUS_LOGGING, new ServerTreeLog(servers));
-            hits = 0;
+            logger.reset();
         });
     }
 

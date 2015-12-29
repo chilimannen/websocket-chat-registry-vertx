@@ -180,7 +180,7 @@ public class RegistryIntegration {
      */
     public void shouldPreferServerWithMoreHits(TestContext context) {
         final Async async = context.async();
-        final CountDown counter = new CountDown(20);
+        final CountDown counter = new CountDown(50);
 
         getConnectorSocket(connector -> {
             sendBus(connector.textHandlerID(), serverEvent(ServerEvent.ServerStatus.UP, 1));

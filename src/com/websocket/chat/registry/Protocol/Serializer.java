@@ -1,8 +1,5 @@
 package com.websocket.chat.registry.Protocol;
 
-/**
- * Created by Robin on 2015-12-18.
- */
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
