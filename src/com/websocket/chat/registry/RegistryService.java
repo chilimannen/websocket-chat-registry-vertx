@@ -25,6 +25,7 @@ public class RegistryService implements Verticle {
     private Map<String, Server> servers = new HashMap<>();
     private Map<String, EventHandler> eventHandler = new HashMap<>();
     private Map<String, MessageHandler> messageHandler = new HashMap<>();
+    private Map<String, String> lastPolled = new HashMap<>();
     private Vertx vertx;
     private IOLogger logger = new IOLogger();
 
@@ -128,24 +129,48 @@ public class RegistryService implements Verticle {
     protected Server getReadyServer(String roomName) throws NoServersFound {
         ArrayList<Server> ready = new ArrayList<>(getReadyServers());
 
-        try {
-            Server preferred = ready.get(new Random().nextInt(ready.size()));
-            Integer hits = -1;
+        Server preferred = getPrioritized(ready, roomName);
+        Integer hits = -1;
 
-            for (Server server : ready) {
-                Room room = server.getRooms().get(roomName);
+        for (Server server : ready) {
+            Room room = server.getRooms().get(roomName);
 
-                if (room != null && room.getHits() > hits) {
-                    preferred = server;
-                    hits = room.getHits();
-                }
+            if (room != null && room.getHits() > hits) {
+                preferred = server;
+                hits = room.getHits();
             }
+        }
 
-            if (preferred.getRooms().containsKey(roomName))
-                preferred.getRooms().get(roomName).hit();
-            return preferred;
-        } catch (IllegalArgumentException e) {
+        if (preferred.getRooms().containsKey(roomName))
+            preferred.getRooms().get(roomName).hit();
+        else
+            lastPolled.put(roomName, preferred.getName());
+        return preferred;
+    }
+
+    /**
+     * Prioritizes servers that has been selected randomly for allocation and
+     * that is ready. If no such servers are found then a ready server is selected
+     * at random and chosen to be the next lastly polled.
+     *
+     * @param ready list of servers ready to host a new instance.
+     * @param roomName the instance name.
+     * @return a server that is ready and preferred.
+     * @throws NoServersFound when no ready servers are available.
+     */
+    private Server getPrioritized(ArrayList<Server> ready, String roomName) throws NoServersFound {
+        String serverName = lastPolled.get(roomName);
+        Server polled = servers.get(serverName);
+
+        if (ready.size() == 0)
             throw new NoServersFound();
+
+        if (polled != null && !polled.getFull()) {
+                return polled;
+        } else {
+            Server server = ready.get(new Random().nextInt(ready.size()));
+            lastPolled.put(roomName, server.getName());
+            return server;
         }
     }
 
